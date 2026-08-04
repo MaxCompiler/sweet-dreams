@@ -13,7 +13,6 @@ class UsuarioController {
     }
 
     public function login() {
-
         if (isset($_SESSION['usuario_id'])) {
             $this->redirigirPorRol($_SESSION['rol']);
         }
@@ -21,7 +20,6 @@ class UsuarioController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email    = trim($_POST['email'] ?? '');
             $password = trim($_POST['password'] ?? '');
-
 
             if ($email === '' || $password === '') {
                 $error = 'Por favor completa todos los campos';
@@ -64,12 +62,11 @@ class UsuarioController {
     public function logout() {
         session_start();
         session_destroy();
-        header('Location: /sweet-dreams/public/index.php?accion=login');
+        header('Location: ' . BASE_URL . '/index.php?accion=login');
         exit;
     }
 
     public function registro() {
-        // Si ya esta logueado, redirigir
         if (isset($_SESSION['usuario_id'])) {
             $this->redirigirPorRol($_SESSION['rol']);
         }
@@ -113,6 +110,7 @@ class UsuarioController {
                     include __DIR__ . '/../views/auth/recuperar.php';
                     return;
                 }
+
                 $_SESSION['recuperar_email'] = $email;
                 $pregunta = $usuario['pregunta_seguridad'];
                 include __DIR__ . '/../views/auth/verificar_pregunta.php';
@@ -133,9 +131,9 @@ class UsuarioController {
                 include __DIR__ . '/../views/auth/nueva_password.php';
 
             } else if (isset($_POST['nueva_password'])) {
-                $id              = $_SESSION['recuperar_id'] ?? '';
-                $nueva_password  = trim($_POST['nueva_password']);
-                $confirmar       = trim($_POST['confirmar_password']);
+                $id             = $_SESSION['recuperar_id'] ?? '';
+                $nueva_password = trim($_POST['nueva_password']);
+                $confirmar      = trim($_POST['confirmar_password']);
 
                 if ($nueva_password !== $confirmar) {
                     $error = 'Las contrasenas no coinciden';
@@ -174,7 +172,7 @@ class UsuarioController {
         $id = $_GET['id'] ?? $_SESSION['usuario_id'];
 
         if ($_SESSION['rol'] === 'cliente' && $id != $_SESSION['usuario_id']) {
-            header('Location: /sweet-dreams/public/index.php?accion=login');
+            header('Location: ' . BASE_URL . '/index.php?accion=login');
             exit;
         }
 
@@ -202,17 +200,17 @@ class UsuarioController {
         $id = $_GET['id'] ?? null;
 
         if (!$id) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarUsuarios');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarUsuarios');
             exit;
         }
 
         if ($id == $_SESSION['usuario_id']) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarUsuarios&error=No puedes eliminarte a ti mismo');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarUsuarios&error=No puedes eliminarte a ti mismo');
             exit;
         }
 
         $this->modelo->eliminarUsuario($id);
-        header('Location: /sweet-dreams/public/index.php?accion=listarUsuarios&exito=Usuario eliminado correctamente');
+        header('Location: ' . BASE_URL . '/index.php?accion=listarUsuarios&exito=Usuario eliminado correctamente');
         exit;
     }
 
@@ -220,14 +218,12 @@ class UsuarioController {
         $this->verificarRol('admin');
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id       = $_POST['id']  ?? null;
+            $id        = $_POST['id']  ?? null;
             $nuevo_rol = $_POST['rol'] ?? null;
-
-            $resultado = $this->modelo->cambiarRol($id, $nuevo_rol);
-            $mensaje = $resultado['mensaje'];
+            $this->modelo->cambiarRol($id, $nuevo_rol);
         }
 
-        header('Location: /sweet-dreams/public/index.php?accion=listarUsuarios');
+        header('Location: ' . BASE_URL . '/index.php?accion=listarUsuarios');
         exit;
     }
 
@@ -241,30 +237,30 @@ class UsuarioController {
             $this->modelo->cambiarEstado($id, $estado);
         }
 
-        header('Location: /sweet-dreams/public/index.php?accion=listarUsuarios');
+        header('Location: ' . BASE_URL . '/index.php?accion=listarUsuarios');
         exit;
     }
 
     private function redirigirPorRol($rol) {
         switch ($rol) {
             case 'admin':
-                header('Location: /sweet-dreams/public/index.php?accion=dashboardAdmin');
+                header('Location: ' . BASE_URL . '/index.php?accion=dashboardAdmin');
                 break;
             case 'empleado':
-                header('Location: /sweet-dreams/public/index.php?accion=dashboardEmpleado');
+                header('Location: ' . BASE_URL . '/index.php?accion=dashboardEmpleado');
                 break;
             case 'cliente':
-                header('Location: /sweet-dreams/public/index.php?accion=dashboardCliente');
+                header('Location: ' . BASE_URL . '/index.php?accion=dashboardCliente');
                 break;
             default:
-                header('Location: /sweet-dreams/public/index.php?accion=login');
+                header('Location: ' . BASE_URL . '/index.php?accion=login');
         }
         exit;
     }
 
     private function verificarSesion() {
         if (!isset($_SESSION['usuario_id'])) {
-            header('Location: /sweet-dreams/public/index.php?accion=login');
+            header('Location: ' . BASE_URL . '/index.php?accion=login');
             exit;
         }
     }
@@ -272,7 +268,7 @@ class UsuarioController {
     private function verificarRol($rol) {
         $this->verificarSesion();
         if ($_SESSION['rol'] !== $rol) {
-            header('Location: /sweet-dreams/public/index.php?accion=login');
+            header('Location: ' . BASE_URL . '/index.php?accion=login');
             exit;
         }
     }

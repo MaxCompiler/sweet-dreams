@@ -1,5 +1,4 @@
 <?php
-
 include_once __DIR__ . '/../models/Producto.php';
 
 class ProductoController {
@@ -24,14 +23,14 @@ class ProductoController {
         $id = $_GET['id'] ?? null;
 
         if (!$id) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarProductos');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarProductos');
             exit;
         }
 
         $producto = $this->modelo->obtenerPorId($id);
 
         if (!$producto) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarProductos&error=Producto no encontrado');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarProductos&error=Producto no encontrado');
             exit;
         }
 
@@ -51,7 +50,7 @@ class ProductoController {
             $resultado = $this->modelo->crear($nombre, $descripcion, $precio, $stock, $imagen);
 
             if ($resultado['Exito']) {
-                header('Location: /sweet-dreams/public/index.php?accion=listarProductos&exito=' . urlencode($resultado['mensaje']));
+                header('Location: ' . BASE_URL . '/index.php?accion=listarProductos&exito=' . urlencode($resultado['mensaje']));
                 exit;
             } else {
                 $error = $resultado['mensaje'];
@@ -68,14 +67,14 @@ class ProductoController {
         $id = $_GET['id'] ?? null;
 
         if (!$id) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarProductos');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarProductos');
             exit;
         }
 
         $producto = $this->modelo->obtenerPorId($id);
 
         if (!$producto) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarProductos&error=Producto no encontrado');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarProductos&error=Producto no encontrado');
             exit;
         }
 
@@ -89,7 +88,7 @@ class ProductoController {
             $resultado = $this->modelo->actualizar($id, $nombre, $descripcion, $precio, $stock, $imagen);
 
             if ($resultado['Exito']) {
-                header('Location: /sweet-dreams/public/index.php?accion=listarProductos&exito=' . urlencode($resultado['mensaje']));
+                header('Location: ' . BASE_URL . '/index.php?accion=listarProductos&exito=' . urlencode($resultado['mensaje']));
                 exit;
             } else {
                 $error = $resultado['mensaje'];
@@ -106,23 +105,23 @@ class ProductoController {
         $id = $_GET['id'] ?? null;
 
         if (!$id) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarProductos');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarProductos');
             exit;
         }
 
         $resultado = $this->modelo->eliminar($id);
 
         if ($resultado['Exito']) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarProductos&exito=' . urlencode($resultado['mensaje']));
+            header('Location: ' . BASE_URL . '/index.php?accion=listarProductos&exito=' . urlencode($resultado['mensaje']));
         } else {
-            header('Location: /sweet-dreams/public/index.php?accion=listarProductos&error=' . urlencode($resultado['mensaje']));
+            header('Location: ' . BASE_URL . '/index.php?accion=listarProductos&error=' . urlencode($resultado['mensaje']));
         }
         exit;
     }
 
     private function verificarSesion() {
         if (!isset($_SESSION['usuario_id'])) {
-            header('Location: /sweet-dreams/public/index.php?accion=login');
+            header('Location: ' . BASE_URL . '/index.php?accion=login');
             exit;
         }
     }
@@ -130,7 +129,7 @@ class ProductoController {
     private function verificarRol($rol) {
         $this->verificarSesion();
         if ($_SESSION['rol'] !== $rol) {
-            header('Location: /sweet-dreams/public/index.php?accion=login');
+            header('Location: ' . BASE_URL . '/index.php?accion=login');
             exit;
         }
     }

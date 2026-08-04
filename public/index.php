@@ -1,9 +1,14 @@
 <?php
+if (getenv('RENDER') || isset($_SERVER['RENDER'])) {
+    define('BASE_URL', '');
+} else {
+    define('BASE_URL', '/sweet-dreams/public');
+}
 
+// Cargar controladores
 include_once __DIR__ . '/../app/controllers/UsuarioController.php';
 include_once __DIR__ . '/../app/controllers/ProductoController.php';
 include_once __DIR__ . '/../app/controllers/PedidoController.php';
-
 
 $accion = $_GET['accion'] ?? 'login';
 
@@ -56,7 +61,6 @@ switch ($accion) {
         break;
 
     // RUTAS DE PRODUCTOS
-
     case 'listarProductos':
         $controller = new ProductoController();
         $controller->listar();
@@ -83,7 +87,6 @@ switch ($accion) {
         break;
 
     // RUTAS DE PEDIDOS
-
     case 'listarPedidos':
         $controller = new PedidoController();
         $controller->listar();
@@ -129,7 +132,7 @@ switch ($accion) {
     case 'dashboardAdmin':
         if (session_status() === PHP_SESSION_NONE) session_start();
         if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
-            header('Location: /sweet-dreams/public/index.php?accion=login');
+            header('Location: ' . BASE_URL . '/index.php?accion=login');
             exit;
         }
         include __DIR__ . '/../app/views/dashboard/admin.php';
@@ -138,7 +141,7 @@ switch ($accion) {
     case 'dashboardEmpleado':
         if (session_status() === PHP_SESSION_NONE) session_start();
         if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'empleado') {
-            header('Location: /sweet-dreams/public/index.php?accion=login');
+            header('Location: ' . BASE_URL . '/index.php?accion=login');
             exit;
         }
         include __DIR__ . '/../app/views/dashboard/empleado.php';
@@ -147,15 +150,15 @@ switch ($accion) {
     case 'dashboardCliente':
         if (session_status() === PHP_SESSION_NONE) session_start();
         if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'cliente') {
-            header('Location: /sweet-dreams/public/index.php?accion=login');
+            header('Location: ' . BASE_URL . '/index.php?accion=login');
             exit;
         }
         include __DIR__ . '/../app/views/dashboard/cliente.php';
         break;
 
-    // RUTA POR DEFECTO (cuando la accion no fue encontrada)
+    // RUTA POR DEFECTO
     default:
-        header('Location: /sweet-dreams/public/index.php?accion=login');
+        header('Location: ' . BASE_URL . '/index.php?accion=login');
         exit;
 }
 ?>

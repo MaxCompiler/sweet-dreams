@@ -1,18 +1,15 @@
 <?php
-
 include_once __DIR__ . '/../models/Pedido.php';
 include_once __DIR__ . '/../models/DetallePedido.php';
 include_once __DIR__ . '/../models/Producto.php';
 include_once __DIR__ . '/../models/Usuario.php';
 
-class PedidoController
-{
+class PedidoController {
 
     private $modelo;
     private $modeloDetalle;
 
-    public function __construct()
-    {
+    public function __construct() {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -20,9 +17,7 @@ class PedidoController
         $this->modeloDetalle = new DetallePedido();
     }
 
-
-    public function listar()
-    {
+    public function listar() {
         $this->verificarSesion();
         $rol = $_SESSION['rol'];
 
@@ -33,36 +28,34 @@ class PedidoController
             $pedidos = $this->modelo->obtenerPorEmpleado($_SESSION['usuario_id']);
             include __DIR__ . '/../views/pedidos/listar_empleado.php';
         } else {
-
             $pedidos = $this->modelo->obtenerPorCliente($_SESSION['usuario_id']);
             include __DIR__ . '/../views/pedidos/listar_cliente.php';
         }
     }
 
-    public function ver()
-    {
+    public function ver() {
         $this->verificarSesion();
         $id = $_GET['id'] ?? null;
 
         if (!$id) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos');
             exit;
         }
 
         $pedido = $this->modelo->obtenerPorId($id);
 
         if (!$pedido) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos&error=Pedido no encontrado');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos&error=Pedido no encontrado');
             exit;
         }
 
         if ($_SESSION['rol'] === 'cliente' && $pedido['cliente_id'] != $_SESSION['usuario_id']) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos');
             exit;
         }
 
         if ($_SESSION['rol'] === 'empleado' && $pedido['empleado_id'] != $_SESSION['usuario_id']) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos');
             exit;
         }
 
@@ -71,8 +64,7 @@ class PedidoController
         include __DIR__ . '/../views/pedidos/ver.php';
     }
 
-    public function crear()
-    {
+    public function crear() {
         $this->verificarRol('cliente');
 
         $productos = (new Producto())->obtenerTodos();
@@ -82,7 +74,6 @@ class PedidoController
             $nota          = $_POST['nota']          ?? '';
             $cliente_id    = $_SESSION['usuario_id'];
 
-            // Crear el pedido
             $resultado = $this->modelo->crear($cliente_id, $fecha_entrega, $nota);
 
             if (!$resultado['Exito']) {
@@ -91,15 +82,13 @@ class PedidoController
                 return;
             }
 
-            $pedido_id = $resultado['id'];
-
-            $productos_ids    = $_POST['producto_id'] ?? [];
-            $cantidades       = $_POST['cantidad']    ?? [];
-            $errores_detalle  = [];
+            $pedido_id       = $resultado['id'];
+            $productos_ids   = $_POST['producto_id'] ?? [];
+            $cantidades      = $_POST['cantidad']    ?? [];
+            $errores_detalle = [];
 
             foreach ($productos_ids as $index => $producto_id) {
                 $cantidad = $cantidades[$index] ?? 1;
-
                 if ($producto_id && $cantidad > 0) {
                     $res = $this->modeloDetalle->agregar($pedido_id, $producto_id, $cantidad);
                     if (!$res['Exito']) {
@@ -114,39 +103,37 @@ class PedidoController
                 return;
             }
 
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos&exito=Pedido creado correctamente');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos&exito=Pedido creado correctamente');
             exit;
+
         } else {
             include __DIR__ . '/../views/pedidos/crear.php';
         }
     }
 
-    public function editar()
-    {
+    public function editar() {
         $this->verificarSesion();
         $id = $_GET['id'] ?? null;
 
         if (!$id) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos');
             exit;
         }
 
         $pedido = $this->modelo->obtenerPorId($id);
 
         if (!$pedido) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos&error=Pedido no encontrado');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos&error=Pedido no encontrado');
             exit;
         }
 
-
         if ($_SESSION['rol'] === 'cliente') {
             if ($pedido['cliente_id'] != $_SESSION['usuario_id']) {
-                header('Location: /sweet-dreams/public/index.php?accion=listarPedidos');
+                header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos');
                 exit;
             }
-
             if ($pedido['estado'] !== 'pendiente') {
-                header('Location: /sweet-dreams/public/index.php?accion=listarPedidos&error=No puedes editar un pedido que ya esta en proceso');
+                header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos&error=No puedes editar un pedido que ya esta en proceso');
                 exit;
             }
         }
@@ -158,7 +145,7 @@ class PedidoController
             $resultado = $this->modelo->actualizar($id, $fecha_entrega, $nota);
 
             if ($resultado['Exito']) {
-                header('Location: /sweet-dreams/public/index.php?accion=verPedido&id=' . $id . '&exito=' . urlencode($resultado['mensaje']));
+                header('Location: ' . BASE_URL . '/index.php?accion=verPedido&id=' . $id . '&exito=' . urlencode($resultado['mensaje']));
                 exit;
             } else {
                 $error = $resultado['mensaje'];
@@ -168,34 +155,31 @@ class PedidoController
         include __DIR__ . '/../views/pedidos/editar.php';
     }
 
-    public function eliminar()
-    {
+    public function eliminar() {
         $this->verificarRol('admin');
         $id = $_GET['id'] ?? null;
 
         if (!$id) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos');
             exit;
         }
 
         $this->modeloDetalle->eliminarPorPedido($id);
-
         $resultado = $this->modelo->eliminar($id);
 
         if ($resultado['Exito']) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos&exito=' . urlencode($resultado['mensaje']));
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos&exito=' . urlencode($resultado['mensaje']));
         } else {
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos&error=' . urlencode($resultado['mensaje']));
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos&error=' . urlencode($resultado['mensaje']));
         }
         exit;
     }
 
-    public function cambiarEstado()
-    {
+    public function cambiarEstado() {
         $this->verificarSesion();
 
         if ($_SESSION['rol'] === 'cliente') {
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos');
             exit;
         }
 
@@ -206,86 +190,82 @@ class PedidoController
             if ($_SESSION['rol'] === 'empleado') {
                 $pedido = $this->modelo->obtenerPorId($id);
                 if ($pedido['empleado_id'] != $_SESSION['usuario_id']) {
-                    header('Location: /sweet-dreams/public/index.php?accion=listarPedidos');
+                    header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos');
                     exit;
                 }
             }
 
             $resultado = $this->modelo->cambiarEstado($id, $estado);
-            header('Location: /sweet-dreams/public/index.php?accion=verPedido&id=' . $id . '&exito=' . urlencode($resultado['mensaje']));
+            header('Location: ' . BASE_URL . '/index.php?accion=verPedido&id=' . $id . '&exito=' . urlencode($resultado['mensaje']));
             exit;
         }
 
-        header('Location: /sweet-dreams/public/index.php?accion=listarPedidos');
+        header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos');
         exit;
     }
 
-    public function asignarEmpleado()
-    {
+    public function asignarEmpleado() {
         $this->verificarRol('admin');
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id          = $_POST['id']          ?? null;
             $empleado_id = $_POST['empleado_id'] ?? null;
 
-            // Validacion: debe seleccionar un empleado
             if (empty($empleado_id)) {
-                header('Location: /sweet-dreams/public/index.php?accion=verPedido&id=' . $id . '&error=Debes seleccionar un empleado para asignar');
+                header('Location: ' . BASE_URL . '/index.php?accion=verPedido&id=' . $id . '&error=Debes seleccionar un empleado para asignar');
                 exit;
             }
 
             $resultado = $this->modelo->asignarEmpleado($id, $empleado_id);
-            header('Location: /sweet-dreams/public/index.php?accion=verPedido&id=' . $id . '&exito=' . urlencode($resultado['mensaje']));
+            header('Location: ' . BASE_URL . '/index.php?accion=verPedido&id=' . $id . '&exito=' . urlencode($resultado['mensaje']));
             exit;
         }
 
-        header('Location: /sweet-dreams/public/index.php?accion=listarPedidos');
+        header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos');
         exit;
     }
 
-    public function cancelar()
-    {
+    public function cancelar() {
         $this->verificarSesion();
         $id = $_GET['id'] ?? null;
 
         if (!$id) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos');
             exit;
         }
 
         $pedido = $this->modelo->obtenerPorId($id);
 
         if ($_SESSION['rol'] === 'cliente' && $pedido['cliente_id'] != $_SESSION['usuario_id']) {
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos');
             exit;
         }
 
         if ($pedido['estado'] !== 'pendiente') {
-            header('Location: /sweet-dreams/public/index.php?accion=listarPedidos&error=Solo puedes cancelar pedidos pendientes');
+            header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos&error=Solo puedes cancelar pedidos pendientes');
             exit;
         }
 
         $this->modelo->cambiarEstado($id, 'cancelado');
         $this->modeloDetalle->eliminarPorPedido($id);
 
-        header('Location: /sweet-dreams/public/index.php?accion=listarPedidos&exito=Pedido cancelado correctamente');
+        header('Location: ' . BASE_URL . '/index.php?accion=listarPedidos&exito=Pedido cancelado correctamente');
         exit;
     }
 
-    private function verificarSesion()
-    {
+    private function verificarSesion() {
         if (!isset($_SESSION['usuario_id'])) {
-            header('Location: /sweet-dreams/public/index.php?accion=login');
+            header('Location: ' . BASE_URL . '/index.php?accion=login');
             exit;
         }
     }
 
-    private function verificarRol($rol)
-    {
+    private function verificarRol($rol) {
         $this->verificarSesion();
         if ($_SESSION['rol'] !== $rol) {
-            header('Location: /sweet-dreams/public/index.php?accion=login');
+            header('Location: ' . BASE_URL . '/index.php?accion=login');
             exit;
         }
     }
 }
+?>
