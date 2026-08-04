@@ -1,5 +1,5 @@
 #credenciales de la base de datos
-config/database.php
+#config/database.php
 
 #variable del entorno
 .env
