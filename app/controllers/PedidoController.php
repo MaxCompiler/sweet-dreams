@@ -5,12 +5,14 @@ include_once __DIR__ . '/../models/DetallePedido.php';
 include_once __DIR__ . '/../models/Producto.php';
 include_once __DIR__ . '/../models/Usuario.php';
 
-class PedidoController {
+class PedidoController
+{
 
     private $modelo;
     private $modeloDetalle;
 
-    public function __construct() {
+    public function __construct()
+    {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -19,18 +21,17 @@ class PedidoController {
     }
 
 
-    public function listar() {
+    public function listar()
+    {
         $this->verificarSesion();
         $rol = $_SESSION['rol'];
 
         if ($rol === 'admin') {
             $pedidos = $this->modelo->obtenerTodos();
             include __DIR__ . '/../views/pedidos/listar_admin.php';
-
         } else if ($rol === 'empleado') {
             $pedidos = $this->modelo->obtenerPorEmpleado($_SESSION['usuario_id']);
             include __DIR__ . '/../views/pedidos/listar_empleado.php';
-
         } else {
 
             $pedidos = $this->modelo->obtenerPorCliente($_SESSION['usuario_id']);
@@ -38,7 +39,8 @@ class PedidoController {
         }
     }
 
-    public function ver() {
+    public function ver()
+    {
         $this->verificarSesion();
         $id = $_GET['id'] ?? null;
 
@@ -69,7 +71,8 @@ class PedidoController {
         include __DIR__ . '/../views/pedidos/ver.php';
     }
 
-    public function crear() {
+    public function crear()
+    {
         $this->verificarRol('cliente');
 
         $productos = (new Producto())->obtenerTodos();
@@ -113,13 +116,13 @@ class PedidoController {
 
             header('Location: /sweet-dreams/public/index.php?accion=listarPedidos&exito=Pedido creado correctamente');
             exit;
-
         } else {
             include __DIR__ . '/../views/pedidos/crear.php';
         }
     }
 
-    public function editar() {
+    public function editar()
+    {
         $this->verificarSesion();
         $id = $_GET['id'] ?? null;
 
@@ -165,7 +168,8 @@ class PedidoController {
         include __DIR__ . '/../views/pedidos/editar.php';
     }
 
-    public function eliminar() {
+    public function eliminar()
+    {
         $this->verificarRol('admin');
         $id = $_GET['id'] ?? null;
 
@@ -186,7 +190,8 @@ class PedidoController {
         exit;
     }
 
-    public function cambiarEstado() {
+    public function cambiarEstado()
+    {
         $this->verificarSesion();
 
         if ($_SESSION['rol'] === 'cliente') {
@@ -215,12 +220,19 @@ class PedidoController {
         exit;
     }
 
-    public function asignarEmpleado() {
+    public function asignarEmpleado()
+    {
         $this->verificarRol('admin');
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id          = $_POST['id']          ?? null;
             $empleado_id = $_POST['empleado_id'] ?? null;
+
+            // Validacion: debe seleccionar un empleado
+            if (empty($empleado_id)) {
+                header('Location: /sweet-dreams/public/index.php?accion=verPedido&id=' . $id . '&error=Debes seleccionar un empleado para asignar');
+                exit;
+            }
 
             $resultado = $this->modelo->asignarEmpleado($id, $empleado_id);
             header('Location: /sweet-dreams/public/index.php?accion=verPedido&id=' . $id . '&exito=' . urlencode($resultado['mensaje']));
@@ -231,7 +243,8 @@ class PedidoController {
         exit;
     }
 
-    public function cancelar() {
+    public function cancelar()
+    {
         $this->verificarSesion();
         $id = $_GET['id'] ?? null;
 
@@ -259,14 +272,16 @@ class PedidoController {
         exit;
     }
 
-    private function verificarSesion() {
+    private function verificarSesion()
+    {
         if (!isset($_SESSION['usuario_id'])) {
             header('Location: /sweet-dreams/public/index.php?accion=login');
             exit;
         }
     }
 
-    private function verificarRol($rol) {
+    private function verificarRol($rol)
+    {
         $this->verificarSesion();
         if ($_SESSION['rol'] !== $rol) {
             header('Location: /sweet-dreams/public/index.php?accion=login');
@@ -274,4 +289,3 @@ class PedidoController {
         }
     }
 }
-?>

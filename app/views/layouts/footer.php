@@ -1,4 +1,4 @@
-</div>
+</div><!-- /container-principal -->
 
 <footer class="footer">
     <p class="mb-0">

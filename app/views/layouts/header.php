@@ -30,6 +30,13 @@
             background-color: var(--fondo);
             color: var(--texto);
             font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container-principal {
+            flex: 1;
         }
 
         /* ── Navbar ── */
@@ -297,7 +304,7 @@
     </nav>
 
     <!-- Contenido principal -->
-    <div class="container mt-4">
+    <div class="container-principal container mt-4">
 
         <!-- Mensajes de exito/error desde la URL -->
         <?php if (isset($_GET['exito'])): ?>
